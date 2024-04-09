@@ -1,0 +1,214 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+
+abstract class Recurso {
+    protected String nome;
+
+    public Recurso(String nome) {
+        this.nome = nome;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    abstract void exibirInformacoes();
+}
+
+class Usuario extends Recurso {
+    protected int idade;
+    protected String email;
+    protected String planoAssinatura;
+
+    public Usuario(String nome, int idade, String email, String planoAssinatura) {
+        super(nome);
+        this.idade = idade;
+        this.email = email;
+        this.planoAssinatura = planoAssinatura;
+    }
+
+    public int getIdade() {
+        return idade;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPlanoAssinatura() {
+        return planoAssinatura;
+    }
+
+    @Override
+    void exibirInformacoes() {
+        System.out.println("Nome: " + nome);
+        System.out.println("Idade: " + idade);
+        System.out.println("Email: " + email);
+        System.out.println("Plano de Assinatura: " + planoAssinatura);
+    }
+}
+
+class Playlist extends Recurso {
+    private ArrayList<String> musicas;
+
+    public Playlist(String nome) {
+        super(nome);
+        this.musicas = new ArrayList<>();
+    }
+
+    public void adicionarMusica(String musica) {
+        this.musicas.add(musica);
+    }
+
+    public ArrayList<String> getMusicas() {
+        return musicas;
+    }
+
+    @Override
+    void exibirInformacoes() {
+        System.out.println("Nome da Playlist: " + nome);
+        System.out.println("Músicas:");
+        if (musicas.isEmpty()) {
+            System.out.println("Nenhuma música nesta playlist.");
+        } else {
+            for (String musica : musicas) {
+                System.out.println("- " + musica);
+            }
+        }
+    }
+}
+
+public class SpotifyApp {
+    private static Scanner scanner = new Scanner(System.in);
+    private static ArrayList<Recurso> recursos = new ArrayList<>();
+
+    public static void main(String[] args) {
+        exibirMenu();
+    }
+
+    public static void exibirMenu() {
+        int opcao;
+        do {
+            System.out.println("---Bem vindo---");
+            System.out.println("O que você deseja fazer?");
+            System.out.println("1. Cadastrar Usuário");
+            System.out.println("2. Criar Playlist");
+            System.out.println("3. Adicionar Música a Playlist");
+            System.out.println("4. Visualizar Informações do usuario");
+            System.out.println("0. Sair");
+
+            opcao = scanner.nextInt();
+            scanner.nextLine(); // Limpar o buffer do scanner
+
+            switch (opcao) {
+                case 1:
+                    cadastrarRecurso(new Usuario("Usuario", 0, "email", "plano"));
+                    break;
+                case 2:
+                    criarRecurso(new Playlist("Playlist"));
+                    break;
+                case 3:
+                    adicionarMusicaAPlaylist();
+                    break;
+                case 4:
+                    visualizarInformacoesRecurso();
+                    break;
+                case 0:
+                    System.out.println("Saindo do programa...");
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+        } while (opcao != 0);
+    }
+
+    public static void cadastrarRecurso(Recurso recurso) {
+        if (recurso instanceof Usuario) {
+            Usuario usuario = (Usuario) recurso;
+            System.out.println("Digite o nome do usuário:");
+            usuario.nome = scanner.nextLine();
+            System.out.println("Digite a idade do usuário:");
+            usuario.idade = scanner.nextInt();
+            scanner.nextLine(); // Limpar o buffer do scanner
+            System.out.println("Digite o email do usuário:");
+            usuario.email = scanner.nextLine();
+
+            System.out.println("Escolha o plano de assinatura:");
+            System.out.println("1. Free");
+            System.out.println("2. Premium");
+            int escolhaPlano = scanner.nextInt();
+            scanner.nextLine(); // Limpar o buffer do scanner
+
+            switch (escolhaPlano) {
+                case 1:
+                    usuario.planoAssinatura = "Free";
+                    break;
+                case 2:
+                    usuario.planoAssinatura = "Premium";
+                    break;
+                default:
+                    System.out.println("Opção inválida. O plano de assinatura foi definido como Free.");
+                    usuario.planoAssinatura = "Free";
+            }
+        }
+        recursos.add(recurso);
+        System.out.println("Recurso cadastrado com sucesso!");
+    }
+
+    public static void criarRecurso(Recurso recurso) {
+        if (recurso instanceof Playlist) {
+            Playlist playlist = (Playlist) recurso;
+            System.out.println("Digite o nome da playlist:");
+            playlist.nome = scanner.nextLine();
+        }
+        recursos.add(recurso);
+        System.out.println("Recurso criado com sucesso!");
+    }
+
+    public static void adicionarMusicaAPlaylist() {
+        System.out.println("Escolha a playlist:");
+        for (int i = 0; i < recursos.size(); i++) {
+            if (recursos.get(i) instanceof Playlist) {
+                System.out.println((i + 1) + ". " + recursos.get(i).getNome());
+            }
+        }
+        int escolhaPlaylist = scanner.nextInt();
+        scanner.nextLine(); 
+
+        if (escolhaPlaylist < 1 || escolhaPlaylist > recursos.size()) {
+            System.out.println("Playlist inválida.");
+            return;
+        }
+
+        Playlist playlist = (Playlist) recursos.get(escolhaPlaylist - 1);
+
+        System.out.println("Digite o nome da música a ser adicionada:");
+        String nomeMusica = scanner.nextLine();
+        playlist.adicionarMusica(nomeMusica);
+        System.out.println("Música adicionada à playlist com sucesso!");
+    }
+
+    public static void visualizarInformacoesRecurso() {
+        if (recursos.isEmpty()) {
+            System.out.println("Nenhum usuario cadastrado.");
+            return;
+        }
+
+        System.out.println("Digite o nome do usuario:");
+        String nomeRecurso = scanner.nextLine();
+
+        Recurso recurso = null;
+        for (Recurso r : recursos) {
+            if (r.getNome().equalsIgnoreCase(nomeRecurso)) {
+                recurso = r;
+                break;
+            }
+        }
+
+        if (recurso != null) {
+            recurso.exibirInformacoes();
+        } else {
+            System.out.println("usuario não encontrado.");
+        }
+    }
+}
